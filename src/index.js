@@ -22,41 +22,17 @@ class Board extends React.Component {
         };
     }
 
-    handleClick(i) {
-        const squares = this.state.squares.slice();
-
-        if (squares[i]|| calculateWinner(squares)) {
-            return;
-        }
-
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
-        this.setState({
-            squares: squares,
-            xIsNext: !this.state.xIsNext,
-        });
-    }
-
     renderSquare(i) {
         return (
             <Square
-                value={this.state.squares[i]} // Board の state が変更されると、個々の Square コンポーネントも自動的に再レンダーされます
-                onClick={() => this.handleClick(i)} />
+                value={this.props.squares[i]} // stateが変更されると自動的に再レンダーされる
+                onClick={() => this.props.onClick(i)} />
         );
     }
 
     render() {
-        // ゲーム勝利判定
-        const winner = calculateWinner(this.state.squares);
-        let status;
-        if (winner) {
-            status = 'Winner: ' + winner;
-        } else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
-
         return (
             <div>
-                <div className="status">{status}</div>
                 <div className="board-row">
                     {this.renderSquare(0)}
                     {this.renderSquare(1)}
@@ -78,15 +54,78 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            history: [{
+                squares: Array(9).fill(''),
+            }],
+            stepNumber: 0,
+            xIsNext: true,
+        };
+    }
+
+    handleClick(i) {
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length - 1];
+        const squares = current.squares.slice();
+
+        if (squares[i]|| calculateWinner(squares)) {
+            return;
+        }
+        
+        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        this.setState({
+            history: history.concat([{ // history配列に今の盤面を結合
+                squares: squares,
+            }]),
+            stepNumber: history.length,
+            xIsNext: !this.state.xIsNext,
+        });
+    }
+
+    jumpTo(step) {
+        this.setState({
+            stepNumber: step,
+            xIsNext: (step % 2) === 0,
+        }); // React は setState で直接指定されたプロパティのみを更新しほかの state はそのまま残す
+    }
+
     render() {
+        // ゲーム勝利判定
+        const history = this.state.history;
+        console.log(history.length);
+        const current = history[this.state.stepNumber];
+        const winner = calculateWinner(current.squares);
+
+        const moves = history.map((step, move) => {
+            const desc = move ?
+                'Go to move #' + move :
+                'Go to game start';
+            return (
+                <li key={move}>
+                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                </li>
+            );
+        });
+
+        let status;
+        if (winner) {
+            status = 'Winner: ' + winner;
+        } else {
+            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+        }
+
         return (
             <div className="game">
                 <div className="game-board">
-                    <Board />
+                    <Board
+                        squares={current.squares}
+                        onClick={(i) => this.handleClick(i)} />
                 </div>
                 <div className="game-info">
-                    <div>{/* status */}</div>
-                    <ol>{/* TODO */}</ol>
+                    <div>{status}</div>
+                    <ol>{moves}</ol>
                 </div>
             </div>
         );
