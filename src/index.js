@@ -5,6 +5,78 @@ import ReactDOM from 'react-dom/client';
 const sceneNameTitle = 'Title';
 const sceneNameStage = 'Stage';
 
+class Vector {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class PlayerEntity {
+    pos;
+
+    constructor(pos) {
+        this.pos = pos;
+    }
+}
+
+function Player(props) {
+    return (
+        <div style={{
+            position: 'absolute',
+            top: props.playerEntity.pos.y,
+            left: props.playerEntity.pos.x}}>
+            @
+        </div>
+    );
+}
+
+class Stage extends React.Component {
+    sceneName = sceneNameStage
+    req;
+    
+    constructor(props) {
+        super(props);
+        this.state = {
+            playerEntity: new PlayerEntity(new Vector(100, 100))
+        }
+    }
+
+    // game update
+    update() {
+        // 座標移動(仮)
+        let playerEnt = this.state.playerEntity;
+        playerEnt.pos.x = (2 + playerEnt.pos.x) % 800;
+        
+        this.setState({
+            playerEntity: playerEnt
+        });
+
+        this.req = requestAnimationFrame(this.update.bind(this));
+    }
+
+    componentDidMount() {
+        this.req = requestAnimationFrame(this.update.bind(this));
+    }
+
+    componentWillUnmount() {
+        cancelAnimationFrame(this.req);
+    }
+    
+    render() {
+        return (
+            <>
+                <Player playerEntity={this.state.playerEntity} />
+                <div>
+                    <button onClick={() => this.props.onClickChangeScene(this.sceneName)}>
+                        change scene
+                    </button>
+                </div>
+            </>
+        );
+    }
+}
+
 class Title extends React.Component {
     sceneName = sceneNameTitle
 
@@ -18,23 +90,6 @@ class Title extends React.Component {
                     </button>
                 </div>
             </div>
-        );
-    }
-}
-
-class Stage extends React.Component {
-    sceneName = sceneNameStage
-
-    render() {
-        return (
-            <div>
-                {sceneNameStage}
-                <div>
-                    <button onClick={() => this.props.onClickChangeScene(this.sceneName)}>
-                        change scene
-                    </button>
-                </div>
-        </div>
         );
     }
 }
