@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 
-const sceneNameTitle = 'Title';
-const sceneNameStage = 'Stage';
+const SCENE_NAME_TITLE = 'Title';
+const SCENE_NAME_STAGE = 'Stage';
+const MS_PER_FRAME = 16;
 
 class Vector {
     constructor(x, y) {
@@ -32,8 +33,8 @@ function Player(props) {
 }
 
 class Stage extends React.Component {
-    sceneName = sceneNameStage
-    req;
+    sceneName = SCENE_NAME_STAGE
+    timerId = 0;
     
     constructor(props) {
         super(props);
@@ -52,15 +53,16 @@ class Stage extends React.Component {
             playerEntity: playerEnt
         });
 
-        this.req = requestAnimationFrame(this.update.bind(this));
+        // call next update
+        this.timerId = window.setTimeout(this.update.bind(this), MS_PER_FRAME);
     }
 
     componentDidMount() {
-        this.req = requestAnimationFrame(this.update.bind(this));
+        this.update();
     }
 
     componentWillUnmount() {
-        cancelAnimationFrame(this.req);
+        clearTimeout(this.timerId);
     }
     
     render() {
@@ -78,12 +80,12 @@ class Stage extends React.Component {
 }
 
 class Title extends React.Component {
-    sceneName = sceneNameTitle
+    sceneName = SCENE_NAME_TITLE
 
     render() {
         return (
             <div>
-                {sceneNameTitle}
+                {SCENE_NAME_TITLE}
                 <div>
                     <button onClick={() => this.props.onClickChangeScene(this.sceneName)}>
                         change scene
@@ -98,17 +100,17 @@ class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            scene: sceneNameTitle
+            scene: SCENE_NAME_TITLE
         }
     }
 
     handleClickChangeScene(sceneName) {
         switch (sceneName) {
-            case sceneNameTitle:
-                this.setState({scene: sceneNameStage});
+            case SCENE_NAME_TITLE:
+                this.setState({scene: SCENE_NAME_STAGE});
                 break;
-            case sceneNameStage:
-                this.setState({scene: sceneNameTitle});
+            case SCENE_NAME_STAGE:
+                this.setState({scene: SCENE_NAME_TITLE});
                 break;
             default: console.log('invalid scene name');
         }
@@ -119,11 +121,11 @@ class Game extends React.Component {
             <div>
                 Game
                 <div>{
-                    this.state.scene === sceneNameTitle && 
+                    this.state.scene === SCENE_NAME_TITLE && 
                     <Title onClickChangeScene={this.handleClickChangeScene.bind(this)} />
                 }</div>
                 <div>{
-                    this.state.scene === sceneNameStage &&
+                    this.state.scene === SCENE_NAME_STAGE &&
                     <Stage onClickChangeScene={this.handleClickChangeScene.bind(this)} />
                 }</div>
             </div>
