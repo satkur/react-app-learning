@@ -32,6 +32,33 @@ function Player(props) {
     );
 }
 
+// handle player input START
+window.isKeyDown = {};
+window.addEventListener('keydown', (e) => {
+    window.isKeyDown[`key_${e.key}`] = true;
+})
+window.addEventListener('keyup', (e) => {
+    window.isKeyDown[`key_${e.key}`] = false;
+})
+
+const controller = () => {
+    // :TODO
+    if (window.isKeyDown.key_ArrowUp || window.isKeyDown.key_w) {
+        // onKeyDown(0, 1);
+        console.log('keyup or w');
+    } else if (window.isKeyDown.key_ArrowRight || window.isKeyDown.key_d) {
+        // onKeyDown(1, 0);
+    } else if (window.isKeyDown.key_ArrowDown || window.isKeyDown.key_s) {
+        // onKeyDown(0, -1);
+    } else if (window.isKeyDown.key_Left || window.isKeyDown.key_a) {
+        // onKeyDown(-1, 0);
+    }
+
+    requestAnimationFrame(controller);
+}
+requestAnimationFrame(controller);
+// handle player input END
+
 class Stage extends React.Component {
     sceneName = SCENE_NAME_STAGE
     timerId = 0;
